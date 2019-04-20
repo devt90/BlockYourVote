@@ -1,2 +1,0 @@
-# BlockYourVote
-Major Project
