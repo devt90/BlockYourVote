@@ -5,16 +5,17 @@ contract Registrar {
     struct Voter {
         bytes32[] allowedDomains;
         mapping (bytes32 => address) voterAddr;
-        mapping (bytes32 => uint8) createPerm;
-        mapping (bytes32 => uint16) voterID;
-        mapping (uint16 => bytes32) voterEmail;
+        mapping (bytes32 => address) ballotAddr;
+        mapping (bytes32 => uint32) ballotId;
+        mapping (bytes32 => bytes32) voterPass;
     }
 
     struct Ballot {
-        mapping (uint32 => address) votingAddress;
-        mapping (address => uint32) ballotID;
-        mapping (uint64 => uint8) whitelistCheck;
-        mapping (bytes32 => uint8) allowedVoters;
+        mapping (uint32 => address) ballotAddr;
+        mapping(address => uint32) ballotId;
+        mapping(uint32 => address) creatorAddr;
+        mapping(address => uint32) ballotIdfromCreatorAddr;
+        mapping(uint32 => bytes32) ballotPass;
     }
 
     Voter v;
@@ -32,20 +33,14 @@ contract Registrar {
         _;
     }
 
-    function registerVoter(bytes32 email, uint16 idnum, bytes32 _domain, uint8 _permreq) public {
+    //also check if the email is already registered or not
+    //also add ballotaddr if required
+    function registerVoter(bytes32 _email, uint32 _ballotId, bytes32 _domain,bytes32 _voterPass) public {
         if (domainCheck(_domain) == false) revert();
-        v.voterID[email] = idnum;
-        v.createPerm[email] = _permreq;
-        v.voterAddr[email] = msg.sender;
-        v.voterEmail[idnum] = email;
-    }
-
-    function givePermission(bytes32 email) public onlyOwner {
-        v.createPerm[email] = 1;
-    }
-
-    function addDomains(bytes32 _domain) public onlyOwner {
-        v.allowedDomains.push(_domain);
+        v.voterAddr[_email] = msg.sender;
+        v.ballotId[_email] = _ballotId;
+        v.voterPass[_email] = _voterPass;
+        v.ballotAddr[_email] = b.ballotAddr[_ballotId];
     }
 
     function domainCheck(bytes32 domain) public view returns (bool) {
@@ -57,27 +52,32 @@ contract Registrar {
         return false;
     }
 
-    function checkReg(bytes32 email, uint16 idnum) public view returns (bool) {
-        if (v.voterID[email] == 0 && v.voterEmail[idnum] == 0) return true;
+    //also add if ballot id is different then also same email is valid
+    function checkReg(bytes32 email,uint32 ballotId) public view returns (bool) {
+        if ((v.voterAddr[email] == address(0x0))&& b.ballotAddr[ballotId] != address(0x0)) return true;
         else return false;
     }
 
-    function checkVoter(bytes32 email) public view returns (uint8) {
-        if (v.voterID[email] == 0) return 1;
-        if (v.voterAddr[email] != msg.sender) return 2;
+    // case 1 when email id is not registered case 2 when email , sender's address, ballotid, password doesnt match
+    function checkVoter(bytes32 email,uint32 ballotId,bytes32 voterPass) public view returns (uint8) {
+        if (v.voterAddr[email] == address(0x0)) return 1;
+        if (v.voterAddr[email] != msg.sender || v.voterPass[email] != voterPass || v.ballotId[email] != ballotId) return 2;
         else return 0;
     }
 
-    function setAddress(address _ballotAddr, uint32 _ballotID) public {
-        b.votingAddress[_ballotID] = _ballotAddr;
-        b.ballotID[_ballotAddr] = _ballotID;
+    //this is setAddress function of original file
+    // also check before registering new ballot
+    function registerBallot(address _ballotAddr, uint32 _ballotId, bytes32 _ballotPass) public {
+        b.ballotAddr[_ballotId] = _ballotAddr;
+        b.ballotId[_ballotAddr] = _ballotId;
+        b.creatorAddr[_ballotId] = msg.sender;
+        b.ballotIdfromCreatorAddr[msg.sender] = _ballotId;
+        b.ballotPass[_ballotId] = _ballotPass; 
     }
 
     function getAddress(uint32 _ballotID) public view returns (address) {
-        return b.votingAddress[_ballotID];
+        return b.ballotAddr[_ballotID];
     }
 
-    function getPermission(bytes32 _email) public view returns (uint8) {
-        return v.createPerm[_email];
-    }
+
 }

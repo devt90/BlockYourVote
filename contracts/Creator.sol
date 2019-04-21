@@ -2,13 +2,13 @@ pragma solidity ^0.5.0;
 
 contract Voting {
 
+    //ballotCreator and owner are same
+    //delete whitelist if not used
     struct Ballot {
-        uint8 ballotType;
         uint32 ballotId;
-        uint8 voteLimit;
-        uint32 timeLimit;
         string title;
-        uint8 whitelist;
+        address ballotCreator;
+        address owner;
     }
 
     struct Candidates {
@@ -17,8 +17,8 @@ contract Voting {
         mapping (bytes32 => uint256) votesReceived;
     }
 
+    //delete whitelisted if not used
     struct Voter {
-        bytes32[] whitelisted;
         mapping (address => uint8) attemptedVotes;
     }
 
@@ -36,15 +36,12 @@ contract Voting {
     bytes32 tempEmail;
     address owner;
 
-    constructor (uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string memory _title, uint8 _whitelist, address _owner) public {
-        b.timeLimit = _timeLimit;
-        b.ballotType = _ballotType;
-        b.voteLimit = _voteLimit;
+    constructor(uint32 _ballotId, string memory _title, address _creator) public {
         b.ballotId = _ballotId;
         b.title = _title;
-        b.whitelist = _whitelist;
-
-        owner = _owner;
+        b.ballotCreator = _creator;
+        b.owner = _creator;
+        owner = _creator;
     }
 
     modifier onlyOwner {
@@ -59,13 +56,6 @@ contract Voting {
         }
     }
 
-    function setWhitelisted(bytes32[] memory _emails) public onlyOwner {
-        for(uint i = 0; i < _emails.length; i++) {
-            tempEmail = _emails[i];
-            v.whitelisted.push(tempEmail);
-        }
-    }
-
     function hashCandidates() public onlyOwner {
         tempVote = 1;
         for(uint i = 0; i < c.candidateList.length; i++) {
@@ -76,9 +66,12 @@ contract Voting {
         }
     }
 
+    //figure out this function more
+    //create more checks in this function
+    //try to write this function on your own after understanding app.js
     function voteForCandidate(uint256[] memory _votes, bytes32 _email, bytes32[] memory _candidates) public {
-        if (checkTimelimit() == false || checkVoteattempts() == false) revert();
-        if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
+        //if (checkTimelimit() == false || checkVoteattempts() == false) revert();
+        //if (checkWhitelist() == true && checkifWhitelisted(_email) == false) revert();
         tempVotes = _votes;
         tempCandidates = _candidates;
         v.attemptedVotes[msg.sender] += 1;
@@ -92,13 +85,15 @@ contract Voting {
         }
     }
 
+    // start here
+    //these functions are changed very less
     function votesFor(bytes32 cHash) public returns (uint256){
         if (validCandidate(cHash) == false) revert();
         return c.votesReceived[cHash];
     }
 
-    function totalVotesFor(bytes32 cHash) public returns (uint256){
-        if (checkBallottype() == false && checkTimelimit() == true) return 0;
+    function totalVotesFor(bytes32 cHash) public  returns (uint256){
+        //if (checkBallottype() == false && checkTimelimit() == true) return 0;
         if (validCandidate(cHash) == false) revert();
         return c.votesReceived[cHash];
     }
@@ -135,49 +130,21 @@ contract Voting {
         return c.candidateList;
     }
 
-    function checkTimelimit() public view returns (bool) {
-        if (block.timestamp >= b.timeLimit) return false;
-        else return true;
-    }
-
-    function checkBallottype() private view returns (bool) {
-        if (b.ballotType == 1) return false;
-        else return true;
-    }
-
     function checkballotID(uint64 ballotID) private view returns (bool) {
         if (ballotID == b.ballotId) return true;
         else return false;
     }
+    //end here
 
-    function checkVoteattempts() public view returns (bool) {
-        if (v.attemptedVotes[msg.sender] == b.voteLimit) return false;
+     function checkVoteattempts() public view returns (bool) {
+        if (v.attemptedVotes[msg.sender] >= 1) return false;
         else return true;
     }
 
-    function checkWhitelist() public view returns (bool) {
-        if (b.whitelist == 1) return true;
-        else return false;
-    }
-
-    function checkifWhitelisted(bytes32 email) public returns (bool) {
-        for(uint j = 0; j < v.whitelisted.length; j++) {
-            tempEmail = v.whitelisted[j];
-            if (tempEmail == email) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function getTimelimit() public view returns (uint32) {
-        return b.timeLimit;
-    }
 
     function getTitle() public view returns (string memory) {
         return b.title;
     }
-
 }
 
 //                         //
@@ -186,16 +153,19 @@ contract Voting {
 
 contract Creator {
 
-    mapping (uint32 => address) contracts;
+    mapping (uint32 => address) ballots;
+    mapping(uint32 => bytes32) ballotPass;
     address owner;
 
-    function createBallot(uint32 _timeLimit, uint8 _ballotType, uint8 _voteLimit, uint32 _ballotId, string memory _title, uint8 _whitelisted) public {
+    function createBallot(uint32 _ballotId, string memory _title,bytes32 _pass) public {
         owner = msg.sender;
-        Voting newContract = new Voting(_timeLimit, _ballotType, _voteLimit, _ballotId, _title, _whitelisted, owner);
-        contracts[_ballotId] = address(newContract);
+        Voting newContract = new Voting(_ballotId, _title,owner);
+        ballots[_ballotId] = address(newContract);
+        ballotPass[_ballotId] = _pass;
     }
 
-    function getAddress(uint32 id) public view returns(address contractAddress) {
-        return contracts[id];
+    function getAddress(uint32 ballotId,bytes32 pass) public view returns(address contractAddress) {
+        if(ballotPass[ballotId]!=pass)revert();
+        return ballots[ballotId];
     }
 }

@@ -9,19 +9,16 @@
 
 <body class="container" style="background-color:rgb(255,255,255)">
     <div class="col-sm-7">
-        <h2 style="color:rgb(255,90,0)">Bronco</h2>
+        <h2 style="color:rgb(255,90,0)">BlockYourVote</h2>
         <h2 style="color:rgb(0,0,255)">Votes</h2>
-        <h2 style="color:rgb(0,0,0)">: Test Phase</h2>
-        <br>
-        <br>
         <br>
         <h2 id="btitle" style="color:rgb(255,90,0)"> </h2>
         <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th style="background-color:rgb(255,255,255)">Candidate/Choice</th>
-                        <th style="background-color:rgb(255,255,255)">Votes</th>
+                        <th style="background-color:rgb(255,255,255)">Candidate Choices</th>
+                        <!--<th style="background-color:rgb(255,255,255)">Votes</th>-->
                     </tr>
                 </thead>
                 <tbody id="candidate-rows" style="background-color:rgb(255,255,255)">
@@ -49,6 +46,9 @@
         <input type="text" id="e-mail" placeholder="Your registered e-mail address" style="width: 400px" />
         <br>
         <br>
+        <input type="text" id="votingPassword" placeholder="Enter your Password" style="width: 250px" />
+        <br>
+        <br>
         <a href="#" onclick="voteForCandidate()" class="btn btn-primary" style="background-color:rgb(255,90,0)">Vote</a>
         <br>
         <br>
@@ -57,13 +57,13 @@
         <br>
         <h2 style="color:rgb(0,0,255)">Register to Vote:</h2>
         <div id="msg2"></div>
-        <input type="text" id="idnum" placeholder="Your BSU student/employee ID" style="width: 250px" />
+        <input type="text" id="ballotNumber" placeholder="Enter the ballot number " style="width: 250px" />
         <br>
         <br>
         <input type="text" id="email" placeholder="Your e-mail address" style="width: 400px" />
         <br>
         <br>
-        <input type="radio" style="width: 25px" name="permreq" value="1"> <b>Request Ballot Creation Permission</b> <br>(You will be notified about ballot creation access at a later time)
+        <input type="text" id="voterPassword" placeholder="Enter Password" style="width: 250px" />
         <br>
         <br>
         <a href="#" onclick="registerToVote()" class="btn btn-primary" style="background-color:rgb(255,90,0)">Register</a>
@@ -79,7 +79,7 @@
             <!-- Create Ballot -->
             <h2 style="color:rgb(0,0,255)">Create Ballot:</h2>
             <div id="msg3"></div>
-            <input type="text" id="cemail" placeholder="Your e-mail address" style="width: 400px" />
+           <!-- <input type="text" id="cemail" placeholder="Your e-mail address" style="width: 400px" />
             <br>
             <br>
             <b style="color:rgb(255,90,0)">Select ballot type:</b>
@@ -88,7 +88,7 @@
             <br>
             <input type="radio" style="width: 25px" name="ballottype" value="1"> <b>Election</b> (results are displayed after end date)
             <br>
-            <br>
+            <br> -->
             <input type="text" id="vtitle" placeholder="Title of your ballot" style="width: 400px" />
             <br>
             <br>
@@ -97,7 +97,7 @@
             <input type="text" id="choices" placeholder="Candidates/Choices" style="width: 400px" />
             <br>
             <br>
-            <input type="text" id="votelimit" placeholder="Number of votes allowed per person" style="width: 400px" />
+            <!--<input type="text" id="votelimit" placeholder="Number of votes allowed per person" style="width: 400px" />
             <br>
             <br>
             <b style="color:rgb(255,90,0)">Select voting type:</b>
@@ -118,6 +118,9 @@
                 <input type="date" id="date" style="width: 170px">
                 <input type="time" id="time" style="width: 125px">
             </form>
+            <br>-->
+            <input type="password" id="ballotPassword" placeholder="Enter Ballot password" style="width: 400px"/>
+            <br>
             <br>
             <a href="#" onclick="ballotSetup()" class="btn btn-primary" style="background-color:rgb(255,90,0)">Create</a>
         </div>
